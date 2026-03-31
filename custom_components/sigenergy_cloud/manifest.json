@@ -1,0 +1,11 @@
+{
+  "domain": "sigenergy_cloud",
+  "name": "Sigenergy Cloud",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/your-repo/sigenergy-cloud-ha",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "requirements": ["pycryptodome==3.21.0"],
+  "version": "0.1.0"
+}
