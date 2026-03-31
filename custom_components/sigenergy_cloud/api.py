@@ -7,8 +7,8 @@ import logging
 from typing import Any
 
 import aiohttp
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.padding import PKCS7
 
 from .const import (
     AES_IV,
@@ -41,9 +41,11 @@ class SigenCloudAuthError(SigenCloudApiError):
 
 def _encrypt_password(password: str) -> str:
     """Encrypt password using AES-CBC with PKCS7 padding."""
-    cipher = AES.new(AES_KEY, AES.MODE_CBC, AES_IV)
-    padded = pad(password.encode("utf-8"), AES.block_size)
-    encrypted = cipher.encrypt(padded)
+    padder = PKCS7(128).padder()
+    padded = padder.update(password.encode("utf-8")) + padder.finalize()
+    cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
+    encryptor = cipher.encryptor()
+    encrypted = encryptor.update(padded) + encryptor.finalize()
     return base64.b64encode(encrypted).decode("utf-8")
 
 

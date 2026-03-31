@@ -6,8 +6,9 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SigenCloudApiClient, SigenCloudApiError, SigenCloudAuthError
@@ -23,7 +24,7 @@ class SigenEnergyConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle the initial step — collect credentials and region."""
         errors: dict[str, str] = {}
 
@@ -70,13 +71,13 @@ class SigenEnergyConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_reauth(
         self, entry_data: dict[str, Any]
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle re-authentication when tokens expire."""
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    ) -> FlowResult:
         """Handle re-auth confirmation with new credentials."""
         errors: dict[str, str] = {}
 

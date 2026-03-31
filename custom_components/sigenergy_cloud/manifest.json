@@ -8,6 +8,6 @@
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/rickboy/SigGenTracker/issues",
-  "requirements": ["pycryptodome==3.21.0"],
+  "requirements": [],
   "version": "0.1.0"
 }
