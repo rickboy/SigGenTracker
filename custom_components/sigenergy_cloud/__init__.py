@@ -14,7 +14,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import SigenCloudApiClient, SigenCloudApiError, SigenCloudAuthError
-from .const import CONF_REGION, DEFAULT_REGION, DEFAULT_SCAN_INTERVAL, DOMAIN, PLATFORMS
+from .const import CONF_REGION, CONF_USER_DEVICE_ID, DEFAULT_REGION, DEFAULT_SCAN_INTERVAL, DOMAIN, PLATFORMS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -74,6 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: SigenEnergyConfigEntry) 
         username=entry.data[CONF_USERNAME],
         password=entry.data[CONF_PASSWORD],
         region=entry.data.get(CONF_REGION, DEFAULT_REGION),
+        user_device_id=entry.data.get(CONF_USER_DEVICE_ID, ""),
     )
 
     try:

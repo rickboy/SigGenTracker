@@ -54,6 +54,7 @@ OPERATIONAL_MODES: dict[int, str] = {
 
 # Config flow keys
 CONF_REGION = "region"
+CONF_USER_DEVICE_ID = "user_device_id"
 
 # Platforms
 PLATFORMS: list[str] = ["sensor", "select", "switch"]

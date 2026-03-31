@@ -12,7 +12,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SigenCloudApiClient, SigenCloudApiError, SigenCloudAuthError
-from .const import CONF_REGION, DEFAULT_REGION, DOMAIN, REGIONS
+from .const import CONF_REGION, CONF_USER_DEVICE_ID, DEFAULT_REGION, DOMAIN, REGIONS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ class SigenEnergyConfigFlow(ConfigFlow, domain=DOMAIN):
                 username=user_input[CONF_USERNAME],
                 password=user_input[CONF_PASSWORD],
                 region=user_input.get(CONF_REGION, DEFAULT_REGION),
+                user_device_id=user_input.get(CONF_USER_DEVICE_ID, ""),
             )
 
             try:
@@ -64,6 +65,7 @@ class SigenEnergyConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_USERNAME): str,
                     vol.Required(CONF_PASSWORD): str,
                     vol.Optional(CONF_REGION, default=DEFAULT_REGION): vol.In(REGIONS),
+                    vol.Optional(CONF_USER_DEVICE_ID, default=""): str,
                 }
             ),
             errors=errors,

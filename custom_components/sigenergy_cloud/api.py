@@ -58,11 +58,13 @@ class SigenCloudApiClient:
         username: str,
         password: str,
         region: str = DEFAULT_REGION,
+        user_device_id: str = "",
     ) -> None:
         self._session = session
         self._username = username
         self._password = password
         self._base_url = BASE_URLS[region]
+        self._user_device_id = user_device_id
         self._access_token: str | None = None
         self._refresh_token_value: str | None = None
 
@@ -74,6 +76,8 @@ class SigenCloudApiClient:
             "grant_type": "password",
             "username": self._username,
             "password": encrypted_pw,
+            "scope": "server",
+            "userDeviceId": self._user_device_id
         }
 
         auth = aiohttp.BasicAuth(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)

@@ -7,7 +7,8 @@
         "data": {
           "username": "Username",
           "password": "Password",
-          "region": "Region"
+          "region": "Region",
+          "user_device_id": "User Device ID"
         }
       },
       "reauth_confirm": {
