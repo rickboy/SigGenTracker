@@ -9,7 +9,7 @@ A Home Assistant custom integration that connects to the **Sigenergy Cloud API**
 - **Real-time sensors**: PV power, battery SoC/SoH, battery charge/discharge, grid import/export, load consumption, system online status
 - **Operational mode selector**: Switch between Maximum Self-Consumption, Fully Feed-in to Grid, VPP, and Time of Use modes
 - **Smart load switches**: Toggle discovered smart loads on/off
-- **Multi-region support**: APAC (Australia), EU, US, CN
+- **Multi-region support**: AUS (Australia/New Zealand), APAC, EU, US, CN
 
 ## Installation
 
@@ -33,7 +33,7 @@ A Home Assistant custom integration that connects to the **Sigenergy Cloud API**
 3. Enter your Sigenergy Cloud credentials:
    - **Username**: Your Sigenergy account email/username
    - **Password**: Your Sigenergy account password
-   - **Region**: Select your region (default: APAC for Australia)
+   - **Region**: Select your region (AUS for Australia/New Zealand, APAC for rest of Asia-Pacific, EU, US, or CN)
 4. The integration will authenticate, discover your station, and create sensor entities
 
 ## Entities Created
@@ -63,7 +63,7 @@ Data is polled every **30 seconds** by default. This is set in the coordinator a
 ## Troubleshooting
 
 - **"Invalid username or password"**: Double-check your credentials. Make sure you can log in at your regional sigencloud.com web app.
-- **"Unable to connect"**: Check your network and ensure `api-apac.sigencloud.com` (or your region's URL) is reachable.
+- **"Unable to connect"**: Check your network and ensure `api-aus.sigencloud.com` (or your region's URL) is reachable.
 - **No smart load switches**: Smart loads only appear if your system has controllable loads configured.
 - Check Home Assistant logs (**Settings → System → Logs**) for `sigenergy_cloud` entries.
 

@@ -63,9 +63,10 @@ All new (workspace is empty):
 - **Token auto-refresh** on 401 responses
 - **`pycryptodome`** as `requirements` entry in `manifest.json` for AES support
 - **Regional base URLs**:
+  - AUS: `https://api-aus.sigencloud.com/` (Australia/New Zealand)
+  - APAC: `https://api-apac.sigencloud.com/` (rest of Asia-Pacific)
   - EU: `https://api-eu.sigencloud.com/`
   - CN: `https://api-cn.sigencloud.com/`
-  - APAC: `https://api-apac.sigencloud.com/` (Australia — default)
   - US: `https://api-us.sigencloud.com/`
 
 ### API Endpoints

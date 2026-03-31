@@ -5,12 +5,14 @@ DEFAULT_SCAN_INTERVAL = 30  # seconds
 
 # Regional API base URLs
 REGION_APAC = "apac"
+REGION_AUS = "aus"
 REGION_EU = "eu"
 REGION_US = "us"
 REGION_CN = "cn"
 
 BASE_URLS: dict[str, str] = {
     REGION_APAC: "https://api-apac.sigencloud.com",
+    REGION_AUS: "https://api-aus.sigencloud.com",
     REGION_EU: "https://api-eu.sigencloud.com",
     REGION_US: "https://api-us.sigencloud.com",
     REGION_CN: "https://api-cn.sigencloud.com",
@@ -18,7 +20,7 @@ BASE_URLS: dict[str, str] = {
 
 DEFAULT_REGION = REGION_APAC
 
-REGIONS: list[str] = [REGION_APAC, REGION_EU, REGION_US, REGION_CN]
+REGIONS: list[str] = [REGION_APAC, REGION_AUS, REGION_EU, REGION_US, REGION_CN]
 
 # AES-CBC encryption for password
 AES_KEY = b"sigensigensigenp"
