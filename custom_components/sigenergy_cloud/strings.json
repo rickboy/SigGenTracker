@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sigenergy Cloud",
+        "description": "Enter your Sigenergy Cloud credentials.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "region": "Region"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "Your session has expired. Please re-enter your credentials.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid username or password.",
+      "cannot_connect": "Unable to connect to the Sigenergy Cloud API.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This station is already configured.",
+      "reauth_successful": "Re-authentication was successful."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "pv_power": { "name": "PV Power" },
+      "battery_soc": { "name": "Battery State of Charge" },
+      "battery_soh": { "name": "Battery State of Health" },
+      "battery_power": { "name": "Battery Power" },
+      "grid_power": { "name": "Grid Power" },
+      "load_power": { "name": "Load Power" },
+      "system_online": { "name": "System Online" }
+    },
+    "select": {
+      "operational_mode": { "name": "Operational Mode" }
+    }
+  }
+}
