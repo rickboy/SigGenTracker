@@ -26,3 +26,6 @@ htmlcov/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Local debug harness
+test_auth_live.py

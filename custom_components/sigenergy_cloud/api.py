@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import json
 import logging
 from typing import Any
 
@@ -39,6 +40,21 @@ class SigenCloudAuthError(SigenCloudApiError):
     """Authentication failed."""
 
 
+def _redact_auth_payload(payload: str) -> str:
+    """Redact sensitive auth fields in a JSON payload string for debug logs."""
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError:
+        return payload
+
+    if isinstance(data, dict):
+        for key in ("access_token", "refresh_token"):
+            if key in data and isinstance(data[key], str):
+                token = data[key]
+                data[key] = f"{token[:8]}..." if len(token) > 8 else "***"
+    return json.dumps(data, ensure_ascii=True)
+
+
 def _encrypt_password(password: str) -> str:
     """Encrypt password using AES-CBC with PKCS7 padding."""
     padder = PKCS7(128).padder()
@@ -47,6 +63,19 @@ def _encrypt_password(password: str) -> str:
     encryptor = cipher.encryptor()
     encrypted = encryptor.update(padded) + encryptor.finalize()
     return base64.b64encode(encrypted).decode("utf-8")
+
+
+def _extract_tokens(payload: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Extract access/refresh tokens from either top-level or nested data payloads."""
+    access_token = payload.get("access_token")
+    refresh_token = payload.get("refresh_token")
+
+    data = payload.get("data")
+    if isinstance(data, dict):
+        access_token = access_token or data.get("access_token")
+        refresh_token = refresh_token or data.get("refresh_token")
+
+    return access_token, refresh_token
 
 
 class SigenCloudApiClient:
@@ -88,17 +117,21 @@ class SigenCloudApiClient:
                 data=data,
                 auth=auth,
             ) as resp:
+                resp_text = await resp.text()
+                _LOGGER.debug(
+                    "Auth POST response status=%s body=%s",
+                    resp.status,
+                    _redact_auth_payload(resp_text),
+                )
                 if resp.status != 200:
-                    text = await resp.text()
                     raise SigenCloudAuthError(
-                        f"Authentication failed (HTTP {resp.status}): {text}"
+                        f"Authentication failed (HTTP {resp.status}): {resp_text}"
                     )
-                result = await resp.json()
+                result = json.loads(resp_text)
         except aiohttp.ClientError as err:
             raise SigenCloudApiError(f"Connection error during auth: {err}") from err
 
-        self._access_token = result.get("access_token")
-        self._refresh_token_value = result.get("refresh_token")
+        self._access_token, self._refresh_token_value = _extract_tokens(result)
 
         if not self._access_token:
             raise SigenCloudAuthError("No access_token in auth response")
@@ -121,16 +154,21 @@ class SigenCloudApiClient:
                 data=data,
                 auth=auth,
             ) as resp:
+                resp_text = await resp.text()
+                _LOGGER.debug(
+                    "Refresh POST response status=%s body=%s",
+                    resp.status,
+                    _redact_auth_payload(resp_text),
+                )
                 if resp.status != 200:
                     raise SigenCloudAuthError("Token refresh failed, re-auth needed")
-                result = await resp.json()
+                result = json.loads(resp_text)
         except aiohttp.ClientError as err:
             raise SigenCloudApiError(
                 f"Connection error during token refresh: {err}"
             ) from err
 
-        self._access_token = result.get("access_token")
-        self._refresh_token_value = result.get("refresh_token")
+        self._access_token, self._refresh_token_value = _extract_tokens(result)
 
     async def _request(
         self,
