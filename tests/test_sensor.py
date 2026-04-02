@@ -98,6 +98,82 @@ class TestSensorDescriptions:
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "battery_capacity")
         assert desc.value_fn(SAMPLE_ALL_DATA) == 9.6
 
+    def test_on_off_grid_status_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "on_off_grid_status")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == "0.0"
+
+    def test_pv_day_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "pv_day_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 15.58
+
+    def test_ac_run_status_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "ac_run_status")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == "1.0"
+
+    def test_weather_temperature_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_temperature")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 23.1
+
+    def test_weather_humidity_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_humidity")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 65.0
+
+    def test_weather_condition_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_condition")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == "Cloudy"
+
+    def test_weather_wind_speed_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_wind_speed")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 3.8
+
+    def test_weather_solar_irradiance_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_solar_irradiance")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 511.2
+
+    def test_tariff_period_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_period")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == "peak"
+
+    def test_tariff_target_soc_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_target_soc")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 80.0
+
+    def test_tariff_predicted_soc_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_predicted_soc")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 74.0
+
+    def test_tariff_planned_charge_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_planned_charge_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 4.2
+
+    def test_tariff_planned_discharge_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_planned_discharge_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 3.6
+
+    def test_daily_import_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_import_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 8.2
+
+    def test_daily_export_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_export_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 3.4
+
+    def test_daily_load_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_load_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 14.1
+
+    def test_daily_pv_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_pv_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 15.6
+
+    def test_daily_battery_charge_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_battery_charge_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 6.1
+
+    def test_daily_battery_discharge_energy_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_battery_discharge_energy")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 5.8
+
     def test_values_with_empty_data(self):
         """All descriptions should handle empty data gracefully."""
         for desc in SENSOR_DESCRIPTIONS:

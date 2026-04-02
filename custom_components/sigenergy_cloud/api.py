@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+from datetime import datetime
 from typing import Any
 
 import aiohttp
@@ -99,6 +100,15 @@ class SigenCloudApiClient:
         self._user_device_id = user_device_id
         self._access_token: str | None = None
         self._refresh_token_value: str | None = None
+        self._station_sn_code: str | None = None
+
+    def set_station_context(self, station_info: dict[str, Any]) -> None:
+        """Persist station context for calls that need serial identifiers."""
+        for key in ("stationSnCode", "stationSNCode", "stationSn", "snCode"):
+            value = station_info.get(key)
+            if value:
+                self._station_sn_code = str(value)
+                break
 
     async def authenticate(self) -> None:
         """Authenticate and obtain access + refresh tokens."""
@@ -369,10 +379,41 @@ class SigenCloudApiClient:
     # ------------------------------------------------------------------
 
     async def get_all_data(self, station_id: str) -> dict[str, Any]:
-        """Fetch energy flow + current mode for the coordinator."""
+        """Fetch core and optional datasets for the coordinator."""
         energy_flow = await self.get_energy_flow(station_id)
         current_mode = await self.get_current_mode(station_id)
-        return {
+
+        result: dict[str, Any] = {
             "energy_flow": energy_flow,
             "current_mode": current_mode,
         }
+
+        if self._station_sn_code:
+            try:
+                result["weather"] = await self.get_current_local_weather(self._station_sn_code)
+            except SigenCloudApiError as err:
+                _LOGGER.debug("Skipping weather data update: %s", err)
+
+        today = datetime.now().strftime("%Y%m%d")
+
+        try:
+            result["energy_custom"] = await self.get_energy_custom(
+                station_id,
+                today,
+                today,
+                date_flag=1,
+                resource_ids="energy_card",
+            )
+        except SigenCloudApiError as err:
+            _LOGGER.debug("Skipping custom energy update: %s", err)
+
+        try:
+            result["tariff_soc_day"] = await self.get_tariff_soc_day(
+                station_id,
+                today,
+                need_prediction=True,
+            )
+        except SigenCloudApiError as err:
+            _LOGGER.debug("Skipping tariff SoC update: %s", err)
+
+        return result

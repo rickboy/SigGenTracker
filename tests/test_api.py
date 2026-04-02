@@ -486,11 +486,31 @@ class TestApiMethods:
         mode_resp = make_mock_response(
             200, json_data={"code": 0, "data": SAMPLE_CURRENT_MODE, "message": "success"}
         )
-        mock_session.request.side_effect = [ef_resp, mode_resp]
+        custom_resp = make_mock_response(
+            200,
+            json_data={
+                "code": 0,
+                "data": {"dailyImportEnergy": 8.2},
+                "message": "success",
+            },
+        )
+        tariff_resp = make_mock_response(
+            200,
+            json_data={
+                "code": 0,
+                "data": {"targetSoc": 80},
+                "message": "success",
+            },
+        )
+        mock_session.request.side_effect = [ef_resp, mode_resp, custom_resp, tariff_resp]
 
         result = await client.get_all_data("STATION001")
 
         assert "energy_flow" in result
         assert "current_mode" in result
+        assert "energy_custom" in result
+        assert "tariff_soc_day" in result
         assert result["energy_flow"]["pvPower"] == 7.7
         assert result["current_mode"]["currentMode"] == 0
+        assert result["energy_custom"]["dailyImportEnergy"] == 8.2
+        assert result["tariff_soc_day"]["targetSoc"] == 80
