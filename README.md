@@ -4,9 +4,14 @@
 
 A Home Assistant custom integration that connects to the **Sigenergy Cloud API** to monitor your solar inverter, battery, and grid data — and control operational modes and smart loads.
 
+## Changelog
+
+- See [CHANGELOG.md](CHANGELOG.md) for release history and recent updates.
+
 ## Features
 
 - **Real-time sensors**: PV power, battery SoC/SoH, battery charge/discharge, grid import/export, load consumption, system online status
+- **Capacity sensors**: PV capacity and battery capacity from station metadata
 - **Operational mode selector**: Switch between Maximum Self-Consumption, Fully Feed-in to Grid, VPP, and Time of Use modes
 - **Smart load switches**: Toggle discovered smart loads on/off
 - **Multi-region support**: AUS (Australia/New Zealand), APAC, EU, US, CN
@@ -40,15 +45,44 @@ A Home Assistant custom integration that connects to the **Sigenergy Cloud API**
 
 | Entity | Type | Description |
 |--------|------|-------------|
-| PV Power | Sensor (W) | Current solar/PV generation |
+| PV Power | Sensor (kW) | Current solar/PV generation |
+| PV Capacity | Sensor (kW) | Installed PV capacity |
 | Battery State of Charge | Sensor (%) | Battery SoC percentage |
 | Battery State of Health | Sensor (%) | Battery SoH percentage |
-| Battery Power | Sensor (W) | Battery charge (+) / discharge (-) power |
-| Grid Power | Sensor (W) | Grid import (+) / export (-) power |
-| Load Power | Sensor (W) | Home consumption power |
+| Battery Power | Sensor (kW) | Battery charge (+) / discharge (-) power |
+| Battery Capacity | Sensor (kWh) | Installed battery capacity |
+| Grid Power | Sensor (kW) | Grid import/export power (mapped from `buySellPower`) |
+| Load Power | Sensor (kW) | Home consumption power |
 | System Online | Sensor | Station online status |
 | Operational Mode | Select | Current inverter operational mode |
 | Smart Load *name* | Switch | Per-load on/off toggle (if applicable) |
+
+Note: The API power values are already returned in kW and are exposed directly without W->kW conversion.
+
+## Live API Debug Harness
+
+For development/debugging, use `test_auth_live.py` from the repository root:
+
+```powershell
+e:/Development/SigGenTracker/.venv/Scripts/python.exe test_auth_live.py
+```
+
+Optional environment variables:
+
+- `SIGEN_DEBUG=1` - enable verbose client debug logging
+- `SIGEN_REGION=aus|apac|eu|us|cn` - override region
+- `SIGEN_STATION_SN_CODE=<serial>` - force station serial for weather endpoint
+- `SIGEN_STATS_DATE=YYYYMMDD` - date used for daily stats endpoints
+
+The harness calls and prints full payloads for:
+
+- Station details (`device/owner/station/home`)
+- Energy flow (`device/sigen/station/energyflow`)
+- Current/available modes
+- System devices and smart load details
+- Current local weather (`device/sigen/device/getCurrentLocalWeather`)
+- Custom energy statistics (`data-process/sigen/station/statistics/v1/energy/custom`)
+- Tariff SoC day statistics (`data-process/sigen/station/statistics/tariff-soc/day`)
 
 ## Requirements
 
