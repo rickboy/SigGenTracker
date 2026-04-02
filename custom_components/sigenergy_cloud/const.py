@@ -40,6 +40,7 @@ ENDPOINT_MODE_SET = "device/energy-profile/mode"
 ENDPOINT_SYSTEM_DEVICES = "device/system/device/systemDevice/card"
 ENDPOINT_SMART_LOADS = "device/tp-device/smart-loads"
 ENDPOINT_SMART_LOAD_TOGGLE = "device/tp-device/smart-loads/control-mode/manual/switch"
+ENDPOINT_CURRENT_LOCAL_WEATHER = "device/sigen/device/getCurrentLocalWeather"
 ENDPOINT_REALTIME_CONSUMPTION = (
     "data-process/sigen/station/statistics/real-time-consumption"
 )

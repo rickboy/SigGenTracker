@@ -324,8 +324,8 @@ class TestApiMethods:
         mock_session.request.return_value = api_resp
 
         result = await client.get_energy_flow("STATION001")
-        assert result["pvPower"] == 5230.0
-        assert result["batterySoc"] == 78.5
+        assert result["pvPower"] == 7.7
+        assert result["batterySoc"] == 77.3
 
         # Verify params
         call_kwargs = mock_session.request.call_args[1]
@@ -343,6 +343,23 @@ class TestApiMethods:
 
         result = await client.get_current_mode("STATION001")
         assert result["currentMode"] == 0
+
+    @pytest.mark.asyncio
+    async def test_get_current_local_weather(self, mock_session):
+        client = await self._make_authed_client(mock_session)
+
+        weather_data = {"temperature": 23.1, "humidity": 65}
+        api_resp = make_mock_response(
+            200,
+            json_data={"code": 0, "data": weather_data, "message": "success"},
+        )
+        mock_session.request.return_value = api_resp
+
+        result = await client.get_current_local_weather("102026031800194")
+        assert result == weather_data
+
+        call_kwargs = mock_session.request.call_args[1]
+        assert call_kwargs["params"] == {"stationSnCode": "102026031800194"}
 
     @pytest.mark.asyncio
     async def test_set_operational_mode(self, mock_session):
@@ -421,5 +438,5 @@ class TestApiMethods:
 
         assert "energy_flow" in result
         assert "current_mode" in result
-        assert result["energy_flow"]["pvPower"] == 5230.0
+        assert result["energy_flow"]["pvPower"] == 7.7
         assert result["current_mode"]["currentMode"] == 0

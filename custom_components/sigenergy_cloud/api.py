@@ -17,6 +17,7 @@ from .const import (
     BASE_URLS,
     DEFAULT_REGION,
     ENDPOINT_AUTH,
+    ENDPOINT_CURRENT_LOCAL_WEATHER,
     ENDPOINT_ENERGY_FLOW,
     ENDPOINT_MODE_CURRENT,
     ENDPOINT_MODE_SET,
@@ -118,16 +119,23 @@ class SigenCloudApiClient:
                 auth=auth,
             ) as resp:
                 resp_text = await resp.text()
+                result: dict[str, Any]
+                if resp_text:
+                    try:
+                        result = json.loads(resp_text)
+                    except json.JSONDecodeError:
+                        result = await resp.json()
+                else:
+                    result = await resp.json()
                 _LOGGER.debug(
                     "Auth POST response status=%s body=%s",
                     resp.status,
-                    _redact_auth_payload(resp_text),
+                    _redact_auth_payload(resp_text) if resp_text else json.dumps(result, ensure_ascii=True),
                 )
                 if resp.status != 200:
                     raise SigenCloudAuthError(
                         f"Authentication failed (HTTP {resp.status}): {resp_text}"
                     )
-                result = json.loads(resp_text)
         except aiohttp.ClientError as err:
             raise SigenCloudApiError(f"Connection error during auth: {err}") from err
 
@@ -155,14 +163,21 @@ class SigenCloudApiClient:
                 auth=auth,
             ) as resp:
                 resp_text = await resp.text()
+                result: dict[str, Any]
+                if resp_text:
+                    try:
+                        result = json.loads(resp_text)
+                    except json.JSONDecodeError:
+                        result = await resp.json()
+                else:
+                    result = await resp.json()
                 _LOGGER.debug(
                     "Refresh POST response status=%s body=%s",
                     resp.status,
-                    _redact_auth_payload(resp_text),
+                    _redact_auth_payload(resp_text) if resp_text else json.dumps(result, ensure_ascii=True),
                 )
                 if resp.status != 200:
                     raise SigenCloudAuthError("Token refresh failed, re-auth needed")
-                result = json.loads(resp_text)
         except aiohttp.ClientError as err:
             raise SigenCloudApiError(
                 f"Connection error during token refresh: {err}"
@@ -293,6 +308,18 @@ class SigenCloudApiClient:
             ENDPOINT_SMART_LOAD_TOGGLE,
             params={"stationId": station_id, "loadPath": load_path},
             json_data={"manualSwitch": 1 if turn_on else 0},
+        )
+
+    # ------------------------------------------------------------------
+    # Weather
+    # ------------------------------------------------------------------
+
+    async def get_current_local_weather(self, station_sn_code: str) -> dict[str, Any]:
+        """Get current local weather for a station serial number code."""
+        return await self._request(
+            "GET",
+            ENDPOINT_CURRENT_LOCAL_WEATHER,
+            params={"stationSnCode": station_sn_code},
         )
 
     # ------------------------------------------------------------------

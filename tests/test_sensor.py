@@ -10,7 +10,7 @@ from custom_components.sigenergy_cloud.sensor import (
     _get_ef,
 )
 
-from .conftest import SAMPLE_ALL_DATA
+from .conftest import SAMPLE_ALL_DATA, SAMPLE_STATION
 
 # ---------------------------------------------------------------------------
 # _get_ef helper
@@ -21,8 +21,8 @@ class TestGetEf:
     """Tests for the _get_ef extraction helper."""
 
     def test_extracts_float(self):
-        data = {"energy_flow": {"pvPower": 5230.0}}
-        assert _get_ef(data, "pvPower") == 5230.0
+        data = {"energy_flow": {"pvPower": 7.7}}
+        assert _get_ef(data, "pvPower") == 7.7
 
     def test_converts_string_to_float(self):
         data = {"energy_flow": {"pvPower": "1234.5"}}
@@ -64,11 +64,11 @@ class TestSensorDescriptions:
 
     def test_pv_power_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "pv_power")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 5230.0
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 7.7
 
     def test_battery_soc_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "battery_soc")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 78.5
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 77.3
 
     def test_battery_soh_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "battery_soh")
@@ -76,19 +76,27 @@ class TestSensorDescriptions:
 
     def test_battery_power_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "battery_power")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == -1200.0
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 6.9
 
     def test_grid_power_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "grid_power")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 150.0
+        assert desc.value_fn(SAMPLE_ALL_DATA) == -0.0
 
     def test_load_power_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "load_power")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 4080.0
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 0.8
 
     def test_system_online_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "system_online")
         assert desc.value_fn(SAMPLE_ALL_DATA) is True
+
+    def test_pv_capacity_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "pv_capacity")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 10.0
+
+    def test_battery_capacity_value(self):
+        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "battery_capacity")
+        assert desc.value_fn(SAMPLE_ALL_DATA) == 9.6
 
     def test_values_with_empty_data(self):
         """All descriptions should handle empty data gracefully."""
@@ -119,11 +127,12 @@ class TestSigenEnergySensor:
         sensor._attr_device_info = {
             "identifiers": {("sigenergy_cloud", "STATION001")},
         }
+        sensor._station_info = SAMPLE_STATION
         return sensor
 
     def test_native_value_returns_data(self):
         sensor = self._make_sensor(SAMPLE_ALL_DATA)
-        assert sensor.native_value == 5230.0
+        assert sensor.native_value == 7.7
 
     def test_native_value_none_when_no_data(self):
         sensor = self._make_sensor(None)

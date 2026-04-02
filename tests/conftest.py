@@ -29,12 +29,20 @@ SAMPLE_STATION = {
 }
 
 SAMPLE_ENERGY_FLOW = {
-    "pvPower": 5230.0,
-    "batterySoc": 78.5,
+    "onOffGridStatus": 0,
+    "pvDayNrg": 15.58,
+    "pvPower": 7.7,
+    "buySellPower": -0.0,
+    "evPower": 0.0,
+    "acPower": 0.0,
+    "acRunStatus": None,
+    "loadPower": 0.8,
+    "heatPumpPower": 0.0,
+    "batteryPower": 6.9,
+    "batterySoc": 77.3,
+    "generatorPower": 0.0,
+    "thirdPvPower": 0.0,
     "batterySoh": 99.1,
-    "batteryPower": -1200.0,
-    "gridPower": 150.0,
-    "loadPower": 4080.0,
     "online": True,
 }
 
@@ -46,6 +54,7 @@ SAMPLE_CURRENT_MODE = {
 SAMPLE_ALL_DATA = {
     "energy_flow": SAMPLE_ENERGY_FLOW,
     "current_mode": SAMPLE_CURRENT_MODE,
+    "station_info": SAMPLE_STATION,
 }
 
 SAMPLE_SYSTEM_DEVICES = [
