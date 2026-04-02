@@ -226,8 +226,8 @@ class SigenCloudApiClient:
                 params=params,
                 json=json_data,
             ) as resp:
-                if resp.status == 401 and retry_auth:
-                    _LOGGER.debug("Token expired, refreshing")
+                if resp.status in (401, 424) and retry_auth:
+                    _LOGGER.debug("Auth expired (HTTP %s), refreshing", resp.status)
                     try:
                         await self._do_refresh_token()
                     except SigenCloudAuthError:
