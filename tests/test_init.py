@@ -132,6 +132,7 @@ class TestSetupEntry:
         client_instance = AsyncMock()
         client_instance.authenticate = AsyncMock()
         client_instance.get_station = AsyncMock(return_value=SAMPLE_STATION)
+        client_instance.set_station_context = MagicMock()
         MockClient.return_value = client_instance
 
         coord_instance = AsyncMock()
@@ -200,6 +201,7 @@ class TestSetupEntry:
         client_instance = AsyncMock()
         client_instance.authenticate = AsyncMock()
         client_instance.get_station = AsyncMock(return_value={})
+        client_instance.set_station_context = MagicMock()
         MockClient.return_value = client_instance
 
         hass = MagicMock()

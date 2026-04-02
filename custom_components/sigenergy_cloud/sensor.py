@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, UnitOfIrradiance, UnitOfSpeed, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
@@ -22,6 +22,12 @@ from .const import DOMAIN
 
 if TYPE_CHECKING:
     from . import SigenEnergyData
+
+
+WEATHER_DEVICE_CLASS_TEMPERATURE = getattr(SensorDeviceClass, "TEMPERATURE", None)
+WEATHER_DEVICE_CLASS_HUMIDITY = getattr(SensorDeviceClass, "HUMIDITY", None)
+WEATHER_DEVICE_CLASS_WIND_SPEED = getattr(SensorDeviceClass, "WIND_SPEED", None)
+WEATHER_DEVICE_CLASS_IRRADIANCE = getattr(SensorDeviceClass, "IRRADIANCE", None)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -222,7 +228,8 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
     SigenEnergySensorDescription(
         key="weather_temperature",
         translation_key="weather_temperature",
-        native_unit_of_measurement="C",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=WEATHER_DEVICE_CLASS_TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: _get_weather_metric(d, "temperature", "temp"),
     ),
@@ -230,6 +237,7 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
         key="weather_humidity",
         translation_key="weather_humidity",
         native_unit_of_measurement=PERCENTAGE,
+        device_class=WEATHER_DEVICE_CLASS_HUMIDITY,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: _get_weather_metric(d, "humidity"),
     ),
@@ -241,14 +249,16 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
     SigenEnergySensorDescription(
         key="weather_wind_speed",
         translation_key="weather_wind_speed",
-        native_unit_of_measurement="m/s",
+        native_unit_of_measurement=UnitOfSpeed.METERS_PER_SECOND,
+        device_class=WEATHER_DEVICE_CLASS_WIND_SPEED,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: _get_weather_metric(d, "windSpeed", "wind_speed"),
     ),
     SigenEnergySensorDescription(
         key="weather_solar_irradiance",
         translation_key="weather_solar_irradiance",
-        native_unit_of_measurement="W/m2",
+        native_unit_of_measurement=UnitOfIrradiance.WATTS_PER_SQUARE_METER,
+        device_class=WEATHER_DEVICE_CLASS_IRRADIANCE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda d: _get_weather_metric(d, "solarIrradiance", "irradiance"),
     ),

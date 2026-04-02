@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from inspect import isawaitable
 from datetime import timedelta
 from typing import Any, TypeAlias
 
@@ -82,9 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: SigenEnergyConfigEntry) 
         await client.authenticate()
         station_info = await client.get_station()
         if isinstance(station_info, dict):
-            maybe_awaitable = client.set_station_context(station_info)
-            if isawaitable(maybe_awaitable):
-                await maybe_awaitable
+            client.set_station_context(station_info)
     except SigenCloudAuthError as err:
         raise ConfigEntryAuthFailed(str(err)) from err
     except SigenCloudApiError as err:

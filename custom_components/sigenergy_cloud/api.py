@@ -12,6 +12,11 @@ import aiohttp
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.padding import PKCS7
 
+try:
+    from homeassistant.util import dt as dt_util
+except ImportError:
+    dt_util = None
+
 from .const import (
     AES_IV,
     AES_KEY,
@@ -103,7 +108,7 @@ class SigenCloudApiClient:
         self._station_sn_code: str | None = None
 
     def set_station_context(self, station_info: dict[str, Any]) -> None:
-        """Persist station context for calls that need serial identifiers."""
+        """Synchronously persist station context for later non-auth API calls."""
         for key in ("stationSnCode", "stationSNCode", "stationSn", "snCode"):
             value = station_info.get(key)
             if value:
@@ -394,7 +399,8 @@ class SigenCloudApiClient:
             except SigenCloudApiError as err:
                 _LOGGER.debug("Skipping weather data update: %s", err)
 
-        today = datetime.now().strftime("%Y%m%d")
+        now = dt_util.now() if dt_util is not None else datetime.now()
+        today = now.strftime("%Y%m%d")
 
         try:
             result["energy_custom"] = await self.get_energy_custom(
