@@ -362,6 +362,60 @@ class TestApiMethods:
         assert call_kwargs["params"] == {"stationSnCode": "102026031800194"}
 
     @pytest.mark.asyncio
+    async def test_get_energy_custom(self, mock_session):
+        client = await self._make_authed_client(mock_session)
+
+        energy_data = {"summary": {"pvDayNrg": 15.58}}
+        api_resp = make_mock_response(
+            200,
+            json_data={"code": 0, "data": energy_data, "message": "success"},
+        )
+        mock_session.request.return_value = api_resp
+
+        result = await client.get_energy_custom(
+            "102026031800194",
+            "20260402",
+            "20260402",
+            date_flag=1,
+            resource_ids="energy_card",
+        )
+
+        assert result == energy_data
+        call_kwargs = mock_session.request.call_args[1]
+        assert call_kwargs["params"] == {
+            "stationId": "102026031800194",
+            "startDate": "20260402",
+            "endDate": "20260402",
+            "dateFlag": 1,
+            "resourceIds": "energy_card",
+        }
+
+    @pytest.mark.asyncio
+    async def test_get_tariff_soc_day(self, mock_session):
+        client = await self._make_authed_client(mock_session)
+
+        tariff_data = {"soc": [], "tariff": []}
+        api_resp = make_mock_response(
+            200,
+            json_data={"code": 0, "data": tariff_data, "message": "success"},
+        )
+        mock_session.request.return_value = api_resp
+
+        result = await client.get_tariff_soc_day(
+            "102026031800194",
+            "20260402",
+            need_prediction=False,
+        )
+
+        assert result == tariff_data
+        call_kwargs = mock_session.request.call_args[1]
+        assert call_kwargs["params"] == {
+            "stationId": "102026031800194",
+            "dt": "20260402",
+            "needPrediction": "false",
+        }
+
+    @pytest.mark.asyncio
     async def test_set_operational_mode(self, mock_session):
         client = await self._make_authed_client(mock_session)
 

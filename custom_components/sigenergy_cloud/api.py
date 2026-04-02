@@ -18,6 +18,7 @@ from .const import (
     DEFAULT_REGION,
     ENDPOINT_AUTH,
     ENDPOINT_CURRENT_LOCAL_WEATHER,
+    ENDPOINT_ENERGY_CUSTOM,
     ENDPOINT_ENERGY_FLOW,
     ENDPOINT_MODE_CURRENT,
     ENDPOINT_MODE_SET,
@@ -26,6 +27,7 @@ from .const import (
     ENDPOINT_SMART_LOADS,
     ENDPOINT_STATION_HOME,
     ENDPOINT_SYSTEM_DEVICES,
+    ENDPOINT_TARIFF_SOC_DAY,
     OAUTH_CLIENT_ID,
     OAUTH_CLIENT_SECRET,
 )
@@ -320,6 +322,46 @@ class SigenCloudApiClient:
             "GET",
             ENDPOINT_CURRENT_LOCAL_WEATHER,
             params={"stationSnCode": station_sn_code},
+        )
+
+    async def get_energy_custom(
+        self,
+        station_id: str,
+        start_date: str,
+        end_date: str,
+        *,
+        date_flag: int = 1,
+        resource_ids: str = "energy_card",
+    ) -> dict[str, Any]:
+        """Get custom energy statistics for a station and date range."""
+        return await self._request(
+            "GET",
+            ENDPOINT_ENERGY_CUSTOM,
+            params={
+                "stationId": station_id,
+                "startDate": start_date,
+                "endDate": end_date,
+                "dateFlag": date_flag,
+                "resourceIds": resource_ids,
+            },
+        )
+
+    async def get_tariff_soc_day(
+        self,
+        station_id: str,
+        dt: str,
+        *,
+        need_prediction: bool = False,
+    ) -> dict[str, Any]:
+        """Get daily tariff and state-of-charge details for a station."""
+        return await self._request(
+            "GET",
+            ENDPOINT_TARIFF_SOC_DAY,
+            params={
+                "stationId": station_id,
+                "dt": dt,
+                "needPrediction": str(need_prediction).lower(),
+            },
         )
 
     # ------------------------------------------------------------------

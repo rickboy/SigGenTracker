@@ -44,6 +44,8 @@ ENDPOINT_CURRENT_LOCAL_WEATHER = "device/sigen/device/getCurrentLocalWeather"
 ENDPOINT_REALTIME_CONSUMPTION = (
     "data-process/sigen/station/statistics/real-time-consumption"
 )
+ENDPOINT_ENERGY_CUSTOM = "data-process/sigen/station/statistics/v1/energy/custom"
+ENDPOINT_TARIFF_SOC_DAY = "data-process/sigen/station/statistics/tariff-soc/day"
 
 # Operational modes
 OPERATIONAL_MODES: dict[int, str] = {
