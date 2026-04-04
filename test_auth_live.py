@@ -274,39 +274,21 @@ async def run() -> None:
             else:
                 print("\n[8] Skipped current local weather (no stationSnCode found)")
 
-            # --- Step 9: Daily custom energy stats ---
+            # --- Step 9: Daily energy stats ---
             print(
-                f"\n[9] Fetching custom energy stats for stationId={station_id} date={stats_date} ...",
+                f"\n[9] Fetching energy stats for stationId={station_id} date={stats_date} ...",
                 end=" ",
                 flush=True,
             )
             try:
-                energy_custom = await client.get_energy_custom(
+                energy_stats = await client.get_energy_stats(
                     station_id,
                     stats_date,
                     stats_date,
                     date_flag=1,
-                    resource_ids="energy_card",
                 )
                 print("OK")
-                _dump_payload("Energy custom response", energy_custom)
-            except SigenCloudApiError as exc:
-                print(f"FAILED\n    {exc}")
-
-            # --- Step 10: Tariff SOC day ---
-            print(
-                f"\n[10] Fetching tariff SOC day for stationId={station_id} date={stats_date} ...",
-                end=" ",
-                flush=True,
-            )
-            try:
-                tariff_soc = await client.get_tariff_soc_day(
-                    station_id,
-                    stats_date,
-                    need_prediction=False,
-                )
-                print("OK")
-                _dump_payload("Tariff SOC day response", tariff_soc)
+                _dump_payload("Energy stats response", energy_stats)
             except SigenCloudApiError as exc:
                 print(f"FAILED\n    {exc}")
         else:
@@ -316,8 +298,7 @@ async def run() -> None:
             print("[6] Skipped system devices (no stationId found)")
             print("[7] Skipped smart load details (no stationId found)")
             print("[8] Skipped current local weather (no stationId found)")
-            print("[9] Skipped custom energy stats (no stationId found)")
-            print("[10] Skipped tariff SOC day (no stationId found)")
+            print("[9] Skipped energy stats (no stationId found)")
 
         # --- Step 11: Token refresh ---
         print("\n[11] Testing token refresh ...", end=" ", flush=True)

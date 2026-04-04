@@ -24,8 +24,8 @@ from .const import (
     DEFAULT_REGION,
     ENDPOINT_AUTH,
     ENDPOINT_CURRENT_LOCAL_WEATHER,
-    ENDPOINT_ENERGY_CUSTOM,
     ENDPOINT_ENERGY_FLOW,
+    ENDPOINT_ENERGY_STATS,
     ENDPOINT_MODE_CURRENT,
     ENDPOINT_MODE_SET,
     ENDPOINT_MODES_ALL,
@@ -33,7 +33,6 @@ from .const import (
     ENDPOINT_SMART_LOADS,
     ENDPOINT_STATION_HOME,
     ENDPOINT_SYSTEM_DEVICES,
-    ENDPOINT_TARIFF_SOC_DAY,
     OAUTH_CLIENT_ID,
     OAUTH_CLIENT_SECRET,
 )
@@ -339,49 +338,25 @@ class SigenCloudApiClient:
             params={"stationSnCode": station_sn_code},
         )
 
-    async def get_energy_custom(
+    async def get_energy_stats(
         self,
         station_id: str,
         start_date: str,
         end_date: str,
         *,
         date_flag: int = 1,
-        resource_ids: str = "energy_card",
     ) -> dict[str, Any]:
-        """Get custom energy statistics for a station and date range."""
+        """Get daily energy statistics for a station and date range."""
         return await self._request(
             "GET",
-            ENDPOINT_ENERGY_CUSTOM,
+            ENDPOINT_ENERGY_STATS,
             params={
                 "stationId": station_id,
                 "startDate": start_date,
                 "endDate": end_date,
                 "dateFlag": date_flag,
-                "resourceIds": resource_ids,
             },
         )
-
-    async def get_tariff_soc_day(
-        self,
-        station_id: str,
-        dt: str,
-        *,
-        need_prediction: bool = False,
-    ) -> dict[str, Any]:
-        """Get daily tariff and state-of-charge details for a station."""
-        return await self._request(
-            "GET",
-            ENDPOINT_TARIFF_SOC_DAY,
-            params={
-                "stationId": station_id,
-                "dt": dt,
-                "needPrediction": str(need_prediction).lower(),
-            },
-        )
-
-    # ------------------------------------------------------------------
-    # Convenience: fetch all data in one coordinator cycle
-    # ------------------------------------------------------------------
 
     async def get_all_data(self, station_id: str) -> dict[str, Any]:
         """Fetch core and optional datasets for the coordinator."""
@@ -403,23 +378,13 @@ class SigenCloudApiClient:
         today = now.strftime("%Y%m%d")
 
         try:
-            result["energy_custom"] = await self.get_energy_custom(
+            result["energy_stats"] = await self.get_energy_stats(
                 station_id,
                 today,
                 today,
                 date_flag=1,
-                resource_ids="energy_card",
             )
         except SigenCloudApiError as err:
-            _LOGGER.debug("Skipping custom energy update: %s", err)
-
-        try:
-            result["tariff_soc_day"] = await self.get_tariff_soc_day(
-                station_id,
-                today,
-                need_prediction=True,
-            )
-        except SigenCloudApiError as err:
-            _LOGGER.debug("Skipping tariff SoC update: %s", err)
+            _LOGGER.debug("Skipping energy stats update: %s", err)
 
         return result

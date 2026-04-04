@@ -102,14 +102,6 @@ class TestSensorDescriptions:
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "on_off_grid_status")
         assert desc.value_fn(SAMPLE_ALL_DATA) == "0.0"
 
-    def test_pv_day_energy_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "pv_day_energy")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 15.58
-
-    def test_ac_run_status_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "ac_run_status")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == "1.0"
-
     def test_weather_temperature_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_temperature")
         assert desc.value_fn(SAMPLE_ALL_DATA) == 23.1
@@ -129,26 +121,6 @@ class TestSensorDescriptions:
     def test_weather_solar_irradiance_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "weather_solar_irradiance")
         assert desc.value_fn(SAMPLE_ALL_DATA) == 511.2
-
-    def test_tariff_period_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_period")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == "peak"
-
-    def test_tariff_target_soc_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_target_soc")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 80.0
-
-    def test_tariff_predicted_soc_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_predicted_soc")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 74.0
-
-    def test_tariff_planned_charge_energy_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_planned_charge_energy")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 4.2
-
-    def test_tariff_planned_discharge_energy_value(self):
-        desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "tariff_planned_discharge_energy")
-        assert desc.value_fn(SAMPLE_ALL_DATA) == 3.6
 
     def test_daily_import_energy_value(self):
         desc = next(d for d in SENSOR_DESCRIPTIONS if d.key == "daily_import_energy")

@@ -126,19 +126,9 @@ def _get_weather_text(data: dict[str, Any], *keys: str) -> str | None:
     return _as_text(_deep_find(data.get("weather", {}), *keys))
 
 
-def _get_energy_custom_metric(data: dict[str, Any], *keys: str) -> float | None:
-    """Extract numeric values from custom energy stats payload."""
-    return _as_float(_deep_find(data.get("energy_custom", {}), *keys))
-
-
-def _get_tariff_metric(data: dict[str, Any], *keys: str) -> float | None:
-    """Extract numeric values from tariff SoC payload."""
-    return _as_float(_deep_find(data.get("tariff_soc_day", {}), *keys))
-
-
-def _get_tariff_text(data: dict[str, Any], *keys: str) -> str | None:
-    """Extract text-like values from tariff SoC payload."""
-    return _as_text(_deep_find(data.get("tariff_soc_day", {}), *keys))
+def _get_energy_stats_metric(data: dict[str, Any], *keys: str) -> float | None:
+    """Extract numeric values from energy stats payload."""
+    return _as_float(_deep_find(data.get("energy_stats", {}), *keys))
 
 
 SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
@@ -214,18 +204,6 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
         value_fn=lambda d: _as_text(_get_ef(d, "onOffGridStatus")),
     ),
     SigenEnergySensorDescription(
-        key="pv_day_energy",
-        translation_key="pv_day_energy",
-        native_unit_of_measurement="kWh",
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_ef(d, "pvDayNrg"),
-    ),
-    SigenEnergySensorDescription(
-        key="ac_run_status",
-        translation_key="ac_run_status",
-        value_fn=lambda d: _as_text(_get_ef(d, "acRunStatus")),
-    ),
-    SigenEnergySensorDescription(
         key="weather_temperature",
         translation_key="weather_temperature",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
@@ -263,77 +241,39 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
         value_fn=lambda d: _get_weather_metric(d, "solarIrradiance", "irradiance"),
     ),
     SigenEnergySensorDescription(
-        key="tariff_period",
-        translation_key="tariff_period",
-        value_fn=lambda d: _get_tariff_text(d, "currentPeriod", "period", "tariffPeriod", "activePeriod"),
-    ),
-    SigenEnergySensorDescription(
-        key="tariff_target_soc",
-        translation_key="tariff_target_soc",
-        native_unit_of_measurement=PERCENTAGE,
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_tariff_metric(d, "targetSoc", "targetSOC"),
-    ),
-    SigenEnergySensorDescription(
-        key="tariff_predicted_soc",
-        translation_key="tariff_predicted_soc",
-        native_unit_of_measurement=PERCENTAGE,
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_tariff_metric(d, "predictedSoc", "predictionSoc", "predictSoc"),
-    ),
-    SigenEnergySensorDescription(
-        key="tariff_planned_charge_energy",
-        translation_key="tariff_planned_charge_energy",
+        key="daily_pv_energy",
+        translation_key="daily_pv_energy",
         native_unit_of_measurement="kWh",
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_tariff_metric(d, "plannedChargeEnergy", "chargeEnergy", "planChargeEnergy"),
-    ),
-    SigenEnergySensorDescription(
-        key="tariff_planned_discharge_energy",
-        translation_key="tariff_planned_discharge_energy",
-        native_unit_of_measurement="kWh",
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_tariff_metric(
-            d,
-            "plannedDischargeEnergy",
-            "dischargeEnergy",
-            "planDischargeEnergy",
-        ),
+        value_fn=lambda d: _get_energy_stats_metric(d, "dailyPvEnergy", "pvEnergy", "pvDayNrg"),
     ),
     SigenEnergySensorDescription(
         key="daily_import_energy",
         translation_key="daily_import_energy",
         native_unit_of_measurement="kWh",
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_energy_custom_metric(d, "dailyImportEnergy", "importEnergy", "gridImportEnergy"),
+        value_fn=lambda d: _get_energy_stats_metric(d, "dailyImportEnergy", "importEnergy", "gridImportEnergy"),
     ),
     SigenEnergySensorDescription(
         key="daily_export_energy",
         translation_key="daily_export_energy",
         native_unit_of_measurement="kWh",
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_energy_custom_metric(d, "dailyExportEnergy", "exportEnergy", "gridExportEnergy"),
+        value_fn=lambda d: _get_energy_stats_metric(d, "dailyExportEnergy", "exportEnergy", "gridExportEnergy"),
     ),
     SigenEnergySensorDescription(
         key="daily_load_energy",
         translation_key="daily_load_energy",
         native_unit_of_measurement="kWh",
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_energy_custom_metric(d, "dailyLoadEnergy", "loadEnergy"),
-    ),
-    SigenEnergySensorDescription(
-        key="daily_pv_energy",
-        translation_key="daily_pv_energy",
-        native_unit_of_measurement="kWh",
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_energy_custom_metric(d, "dailyPvEnergy", "pvEnergy", "pvDayNrg"),
+        value_fn=lambda d: _get_energy_stats_metric(d, "dailyLoadEnergy", "loadEnergy"),
     ),
     SigenEnergySensorDescription(
         key="daily_battery_charge_energy",
         translation_key="daily_battery_charge_energy",
         native_unit_of_measurement="kWh",
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_energy_custom_metric(
+        value_fn=lambda d: _get_energy_stats_metric(
             d,
             "dailyBatteryChargeEnergy",
             "batteryChargeEnergy",
@@ -345,7 +285,7 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
         translation_key="daily_battery_discharge_energy",
         native_unit_of_measurement="kWh",
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda d: _get_energy_custom_metric(
+        value_fn=lambda d: _get_energy_stats_metric(
             d,
             "dailyBatteryDischargeEnergy",
             "batteryDischargeEnergy",

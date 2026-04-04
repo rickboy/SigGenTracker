@@ -55,21 +55,13 @@ SAMPLE_WEATHER = {
     "solarIrradiance": 511.2,
 }
 
-SAMPLE_ENERGY_CUSTOM = {
+SAMPLE_ENERGY_STATS = {
     "dailyImportEnergy": 8.2,
     "dailyExportEnergy": 3.4,
     "dailyLoadEnergy": 14.1,
     "dailyPvEnergy": 15.6,
     "dailyBatteryChargeEnergy": 6.1,
     "dailyBatteryDischargeEnergy": 5.8,
-}
-
-SAMPLE_TARIFF_SOC_DAY = {
-    "currentPeriod": "peak",
-    "targetSoc": 80,
-    "predictedSoc": 74,
-    "plannedChargeEnergy": 4.2,
-    "plannedDischargeEnergy": 3.6,
 }
 
 SAMPLE_CURRENT_MODE = {
@@ -82,8 +74,7 @@ SAMPLE_ALL_DATA = {
     "current_mode": SAMPLE_CURRENT_MODE,
     "station_info": SAMPLE_STATION,
     "weather": SAMPLE_WEATHER,
-    "energy_custom": SAMPLE_ENERGY_CUSTOM,
-    "tariff_soc_day": SAMPLE_TARIFF_SOC_DAY,
+    "energy_stats": SAMPLE_ENERGY_STATS,
 }
 
 SAMPLE_SYSTEM_DEVICES = [
