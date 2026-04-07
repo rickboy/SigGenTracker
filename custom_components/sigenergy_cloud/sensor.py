@@ -131,6 +131,11 @@ def _get_energy_stats_metric(data: dict[str, Any], *keys: str) -> float | None:
     return _as_float(_deep_find(data.get("energy_stats", {}), *keys))
 
 
+def _get_custom_energy_stats_metric(data: dict[str, Any], *keys: str) -> float | None:
+    """Extract numeric values from custom energy stats payload."""
+    return _as_float(_deep_find(data.get("custom_energy_stats", {}), *keys))
+
+
 SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
     SigenEnergySensorDescription(
         key="pv_power",
@@ -292,6 +297,68 @@ SENSOR_DESCRIPTIONS: tuple[SigenEnergySensorDescription, ...] = (
             "dischargeEnergy",
         ),
     ),
+    SigenEnergySensorDescription(
+        key="custom_daily_import_energy",
+        translation_key="custom_daily_import_energy",
+        native_unit_of_measurement="kWh",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: _get_custom_energy_stats_metric(
+            d,
+            "dailyImportEnergy",
+            "importEnergy",
+            "gridImportEnergy",
+        ),
+    ),
+    SigenEnergySensorDescription(
+        key="custom_daily_export_energy",
+        translation_key="custom_daily_export_energy",
+        native_unit_of_measurement="kWh",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: _get_custom_energy_stats_metric(
+            d,
+            "dailyExportEnergy",
+            "exportEnergy",
+            "gridExportEnergy",
+        ),
+    ),
+    SigenEnergySensorDescription(
+        key="custom_daily_load_energy",
+        translation_key="custom_daily_load_energy",
+        native_unit_of_measurement="kWh",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: _get_custom_energy_stats_metric(d, "dailyLoadEnergy", "loadEnergy"),
+    ),
+    SigenEnergySensorDescription(
+        key="custom_daily_pv_energy",
+        translation_key="custom_daily_pv_energy",
+        native_unit_of_measurement="kWh",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: _get_custom_energy_stats_metric(d, "dailyPvEnergy", "pvEnergy", "pvDayNrg"),
+    ),
+    SigenEnergySensorDescription(
+        key="custom_daily_battery_charge_energy",
+        translation_key="custom_daily_battery_charge_energy",
+        native_unit_of_measurement="kWh",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: _get_custom_energy_stats_metric(
+            d,
+            "dailyBatteryChargeEnergy",
+            "batteryChargeEnergy",
+            "chargeEnergy",
+        ),
+    ),
+    SigenEnergySensorDescription(
+        key="custom_daily_battery_discharge_energy",
+        translation_key="custom_daily_battery_discharge_energy",
+        native_unit_of_measurement="kWh",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda d: _get_custom_energy_stats_metric(
+            d,
+            "dailyBatteryDischargeEnergy",
+            "batteryDischargeEnergy",
+            "dischargeEnergy",
+        ),
+    ),
 )
 
 
@@ -310,6 +377,7 @@ async def async_setup_entry(
         SigenEnergySensor(coordinator, description, station_id, station_info)
         for description in SENSOR_DESCRIPTIONS
     ]
+    entities.append(SigenEnergyRawDiagnosticSensor(coordinator, station_id, station_info))
     async_add_entities(entities)
 
 
@@ -347,3 +415,111 @@ class SigenEnergySensor(
         merged_data = dict(self.coordinator.data)
         merged_data.setdefault("station_info", self._station_info)
         return self.entity_description.value_fn(merged_data)
+
+
+class SigenEnergyRawDiagnosticSensor(
+    CoordinatorEntity[DataUpdateCoordinator[dict[str, Any]]], SensorEntity
+):
+    """Diagnostic sensor exposing raw payloads and unmapped keys."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "raw_payload_diagnostic"
+    _attr_entity_category = "diagnostic"
+
+    def __init__(
+        self,
+        coordinator: DataUpdateCoordinator[dict[str, Any]],
+        station_id: str,
+        station_info: dict[str, Any],
+    ) -> None:
+        super().__init__(coordinator)
+        self._station_id = station_id
+        self._station_info = station_info
+        self._attr_unique_id = f"{station_id}_raw_payload_diagnostic"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, station_id)},
+            "name": f"Sigenergy {station_id}",
+            "manufacturer": "Sigenergy",
+        }
+
+    @property
+    def native_value(self) -> str | None:
+        """Return diagnostic status."""
+        if self.coordinator.data is None:
+            return None
+        return "available"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Expose raw payloads and unmapped keys."""
+        data = self.coordinator.data or {}
+        station_info = data.get("station_info", self._station_info)
+        energy_flow = data.get("energy_flow", {})
+        current_mode = data.get("current_mode", {})
+        weather = data.get("weather", {})
+        energy_stats = data.get("energy_stats", {})
+        custom_energy_stats = data.get("custom_energy_stats", {})
+
+        mapped_station_keys = {"pvCapacity", "batteryCapacity"}
+        mapped_energy_flow_keys = {
+            "pvPower",
+            "batterySoc",
+            "batterySoh",
+            "batteryPower",
+            "buySellPower",
+            "gridPower",
+            "loadPower",
+            "online",
+            "onOffGridStatus",
+        }
+        mapped_weather_keys = {
+            "temperature",
+            "temp",
+            "humidity",
+            "condition",
+            "weather",
+            "weatherDesc",
+            "weatherCode",
+            "windSpeed",
+            "wind_speed",
+            "solarIrradiance",
+            "irradiance",
+        }
+        mapped_energy_stats_keys = {
+            "dailyImportEnergy",
+            "importEnergy",
+            "gridImportEnergy",
+            "dailyExportEnergy",
+            "exportEnergy",
+            "gridExportEnergy",
+            "dailyLoadEnergy",
+            "loadEnergy",
+            "dailyPvEnergy",
+            "pvEnergy",
+            "pvDayNrg",
+            "dailyBatteryChargeEnergy",
+            "batteryChargeEnergy",
+            "chargeEnergy",
+            "dailyBatteryDischargeEnergy",
+            "batteryDischargeEnergy",
+            "dischargeEnergy",
+        }
+
+        def _unmapped(payload: Any, mapped_keys: set[str]) -> dict[str, Any]:
+            if not isinstance(payload, dict):
+                return {}
+            return {k: v for k, v in payload.items() if k not in mapped_keys}
+
+        return {
+            "station_info_raw": station_info,
+            "energy_flow_raw": energy_flow,
+            "current_mode_raw": current_mode,
+            "weather_raw": weather,
+            "energy_stats_raw": energy_stats,
+            "custom_energy_stats_raw": custom_energy_stats,
+            "unmapped_station_info": _unmapped(station_info, mapped_station_keys),
+            "unmapped_energy_flow": _unmapped(energy_flow, mapped_energy_flow_keys),
+            "unmapped_weather": _unmapped(weather, mapped_weather_keys),
+            "unmapped_energy_stats": _unmapped(energy_stats, mapped_energy_stats_keys),
+            "unmapped_custom_energy_stats": _unmapped(custom_energy_stats, mapped_energy_stats_keys),
+        }

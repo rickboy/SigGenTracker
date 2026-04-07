@@ -64,6 +64,16 @@ SAMPLE_ENERGY_STATS = {
     "dailyBatteryDischargeEnergy": 5.8,
 }
 
+SAMPLE_CUSTOM_ENERGY_STATS = {
+    "dailyImportEnergy": 7.9,
+    "dailyExportEnergy": 3.1,
+    "dailyLoadEnergy": 13.6,
+    "dailyPvEnergy": 14.8,
+    "dailyBatteryChargeEnergy": 5.7,
+    "dailyBatteryDischargeEnergy": 5.3,
+    "unmappedDiagnosticField": "present",
+}
+
 SAMPLE_CURRENT_MODE = {
     "currentMode": 0,
     "currentProfileId": None,
@@ -75,6 +85,7 @@ SAMPLE_ALL_DATA = {
     "station_info": SAMPLE_STATION,
     "weather": SAMPLE_WEATHER,
     "energy_stats": SAMPLE_ENERGY_STATS,
+    "custom_energy_stats": SAMPLE_CUSTOM_ENERGY_STATS,
 }
 
 SAMPLE_SYSTEM_DEVICES = [

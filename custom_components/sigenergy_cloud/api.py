@@ -493,4 +493,15 @@ class SigenCloudApiClient:
         except SigenCloudApiError as err:
             _LOGGER.debug("Skipping energy stats update: %s", err)
 
+        try:
+            result["custom_energy_stats"] = await self.get_custom_energy_stats(
+                station_id,
+                today,
+                today,
+                date_flag=1,
+                resource_ids="energy_card",
+            )
+        except SigenCloudApiError as err:
+            _LOGGER.debug("Skipping custom energy stats update: %s", err)
+
         return result

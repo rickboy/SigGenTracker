@@ -503,13 +503,23 @@ class TestApiMethods:
                 "message": "success",
             },
         )
-        mock_session.request.side_effect = [ef_resp, mode_resp, stats_resp]
+        custom_stats_resp = make_mock_response(
+            200,
+            json_data={
+                "code": 0,
+                "data": {"dailyImportEnergy": 7.9},
+                "message": "success",
+            },
+        )
+        mock_session.request.side_effect = [ef_resp, mode_resp, stats_resp, custom_stats_resp]
 
         result = await client.get_all_data("STATION001")
 
         assert "energy_flow" in result
         assert "current_mode" in result
         assert "energy_stats" in result
+        assert "custom_energy_stats" in result
         assert result["energy_flow"]["pvPower"] == 7.7
         assert result["current_mode"]["currentMode"] == 0
         assert result["energy_stats"]["dailyImportEnergy"] == 8.2
+        assert result["custom_energy_stats"]["dailyImportEnergy"] == 7.9
