@@ -390,7 +390,7 @@ class TestApiMethods:
         }
 
     @pytest.mark.asyncio
-    async def test_get_custom_energy_stats_fallback_params(self, mock_session):
+    async def test_get_custom_energy_stats_retries_on_500(self, mock_session):
         client = await self._make_authed_client(mock_session)
 
         fail_resp = make_mock_response(
@@ -419,9 +419,10 @@ class TestApiMethods:
         first_call = mock_session.request.call_args_list[0]
         second_call = mock_session.request.call_args_list[1]
         assert first_call[0][0] == "GET"
+        assert second_call[0][0] == "GET"
+        assert first_call[1]["params"] == second_call[1]["params"]
         assert first_call[1]["params"]["stationId"] == "STATION001"
         assert first_call[1]["params"]["resourceIds"] == "energy_card"
-        assert second_call[0][0] == "GET"
 
     @pytest.mark.asyncio
     async def test_set_operational_mode(self, mock_session):

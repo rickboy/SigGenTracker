@@ -429,19 +429,26 @@ class SigenCloudApiClient:
 
         last_error: SigenCloudApiError | None = None
         for params in deduped_candidates:
-            try:
-                return await self._request(
-                    "GET",
-                    ENDPOINT_ENERGY_STATS_CUSTOM,
-                    params=params,
-                )
-            except SigenCloudApiError as err:
-                last_error = err
-                _LOGGER.debug(
-                    "Custom energy stats failed method=GET params=%s: %s",
-                    params,
-                    err,
-                )
+            # For transient backend failures, retry once with the same request
+            # before moving to compatibility variants.
+            for attempt in (1, 2):
+                try:
+                    return await self._request(
+                        "GET",
+                        ENDPOINT_ENERGY_STATS_CUSTOM,
+                        params=params,
+                    )
+                except SigenCloudApiError as err:
+                    last_error = err
+                    _LOGGER.debug(
+                        "Custom energy stats failed method=GET attempt=%s params=%s: %s",
+                        attempt,
+                        params,
+                        err,
+                    )
+                    if attempt == 1 and "HTTP 500" in str(err):
+                        continue
+                    break
 
         if last_error is not None:
             last_message = str(last_error)

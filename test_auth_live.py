@@ -20,6 +20,7 @@ import importlib.util
 import json
 import logging
 import os
+import re
 import sys
 
 import aiohttp
@@ -313,7 +314,13 @@ async def run() -> None:
                 lowered = message.lower()
                 if (
                     "unsupported for this account/region" in lowered
-                    or ("http 500" in lowered and ("system error" in lowered or '"code":1' in lowered))
+                    or (
+                        "http 500" in lowered
+                        and (
+                            "system error" in lowered
+                            or re.search(r'"code"\s*:\s*1\b', lowered) is not None
+                        )
+                    )
                 ):
                     print("UNAVAILABLE")
                     print("    Endpoint appears unsupported for this account/region")
