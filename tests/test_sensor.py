@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 from custom_components.sigenergy_cloud.sensor import (
     SENSOR_DESCRIPTIONS,
-    SigenEnergyRawDiagnosticSensor,
     SigenEnergySensor,
     _get_ef,
 )
@@ -202,22 +201,3 @@ class TestSigenEnergySensor:
     def test_device_info(self):
         sensor = self._make_sensor(SAMPLE_ALL_DATA)
         assert ("sigenergy_cloud", "STATION001") in sensor._attr_device_info["identifiers"]
-
-
-class TestRawDiagnosticSensor:
-    """Tests for the raw diagnostic sensor entity."""
-
-    def test_native_value_available(self):
-        coordinator = MagicMock()
-        coordinator.data = SAMPLE_ALL_DATA
-        sensor = SigenEnergyRawDiagnosticSensor(coordinator, "STATION001", SAMPLE_STATION)
-        assert sensor.native_value == "available"
-
-    def test_extra_state_attributes_include_custom_and_unmapped(self):
-        coordinator = MagicMock()
-        coordinator.data = SAMPLE_ALL_DATA
-        sensor = SigenEnergyRawDiagnosticSensor(coordinator, "STATION001", SAMPLE_STATION)
-        attrs = sensor.extra_state_attributes
-        assert "custom_energy_stats_raw" in attrs
-        assert attrs["custom_energy_stats_raw"]["dailyImportEnergy"] == 7.9
-        assert attrs["unmapped_custom_energy_stats"]["unmappedDiagnosticField"] == "present"

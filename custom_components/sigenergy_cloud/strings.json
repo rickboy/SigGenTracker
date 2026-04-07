@@ -58,8 +58,7 @@
       "custom_daily_load_energy": { "name": "Custom Daily Load Energy" },
       "custom_daily_pv_energy": { "name": "Custom Daily PV Energy" },
       "custom_daily_battery_charge_energy": { "name": "Custom Daily Battery Charge Energy" },
-      "custom_daily_battery_discharge_energy": { "name": "Custom Daily Battery Discharge Energy" },
-      "raw_payload_diagnostic": { "name": "Raw Payload Diagnostic" }
+      "custom_daily_battery_discharge_energy": { "name": "Custom Daily Battery Discharge Energy" }
     },
     "select": {
       "operational_mode": { "name": "Operational Mode" }

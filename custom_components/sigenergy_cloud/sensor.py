@@ -18,16 +18,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
-try:
-    from homeassistant.helpers.entity import EntityCategory
-except ImportError:  # pragma: no cover - fallback for lightweight test stubs
-    from enum import Enum
-
-    class EntityCategory(Enum):
-        """Fallback EntityCategory enum for test environments."""
-
-        DIAGNOSTIC = "diagnostic"
-
 from .const import DOMAIN
 
 if TYPE_CHECKING:
@@ -387,7 +377,6 @@ async def async_setup_entry(
         SigenEnergySensor(coordinator, description, station_id, station_info)
         for description in SENSOR_DESCRIPTIONS
     ]
-    entities.append(SigenEnergyRawDiagnosticSensor(coordinator, station_id, station_info))
     async_add_entities(entities)
 
 
@@ -425,111 +414,3 @@ class SigenEnergySensor(
         merged_data = dict(self.coordinator.data)
         merged_data.setdefault("station_info", self._station_info)
         return self.entity_description.value_fn(merged_data)
-
-
-class SigenEnergyRawDiagnosticSensor(
-    CoordinatorEntity[DataUpdateCoordinator[dict[str, Any]]], SensorEntity
-):
-    """Diagnostic sensor exposing raw payloads and unmapped keys."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "raw_payload_diagnostic"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-
-    def __init__(
-        self,
-        coordinator: DataUpdateCoordinator[dict[str, Any]],
-        station_id: str,
-        station_info: dict[str, Any],
-    ) -> None:
-        super().__init__(coordinator)
-        self._station_id = station_id
-        self._station_info = station_info
-        self._attr_unique_id = f"{station_id}_raw_payload_diagnostic"
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, station_id)},
-            "name": f"Sigenergy {station_id}",
-            "manufacturer": "Sigenergy",
-        }
-
-    @property
-    def native_value(self) -> str | None:
-        """Return diagnostic status."""
-        if self.coordinator.data is None:
-            return None
-        return "available"
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Expose raw payloads and unmapped keys."""
-        data = self.coordinator.data or {}
-        station_info = data.get("station_info", self._station_info)
-        energy_flow = data.get("energy_flow", {})
-        current_mode = data.get("current_mode", {})
-        weather = data.get("weather", {})
-        energy_stats = data.get("energy_stats", {})
-        custom_energy_stats = data.get("custom_energy_stats", {})
-
-        mapped_station_keys = {"pvCapacity", "batteryCapacity"}
-        mapped_energy_flow_keys = {
-            "pvPower",
-            "batterySoc",
-            "batterySoh",
-            "batteryPower",
-            "buySellPower",
-            "gridPower",
-            "loadPower",
-            "online",
-            "onOffGridStatus",
-        }
-        mapped_weather_keys = {
-            "temperature",
-            "temp",
-            "humidity",
-            "condition",
-            "weather",
-            "weatherDesc",
-            "weatherCode",
-            "windSpeed",
-            "wind_speed",
-            "solarIrradiance",
-            "irradiance",
-        }
-        mapped_energy_stats_keys = {
-            "dailyImportEnergy",
-            "importEnergy",
-            "gridImportEnergy",
-            "dailyExportEnergy",
-            "exportEnergy",
-            "gridExportEnergy",
-            "dailyLoadEnergy",
-            "loadEnergy",
-            "dailyPvEnergy",
-            "pvEnergy",
-            "pvDayNrg",
-            "dailyBatteryChargeEnergy",
-            "batteryChargeEnergy",
-            "chargeEnergy",
-            "dailyBatteryDischargeEnergy",
-            "batteryDischargeEnergy",
-            "dischargeEnergy",
-        }
-
-        def _unmapped(payload: Any, mapped_keys: set[str]) -> dict[str, Any]:
-            if not isinstance(payload, dict):
-                return {}
-            return {k: v for k, v in payload.items() if k not in mapped_keys}
-
-        return {
-            "station_info_raw": station_info,
-            "energy_flow_raw": energy_flow,
-            "current_mode_raw": current_mode,
-            "weather_raw": weather,
-            "energy_stats_raw": energy_stats,
-            "custom_energy_stats_raw": custom_energy_stats,
-            "unmapped_station_info": _unmapped(station_info, mapped_station_keys),
-            "unmapped_energy_flow": _unmapped(energy_flow, mapped_energy_flow_keys),
-            "unmapped_weather": _unmapped(weather, mapped_weather_keys),
-            "unmapped_energy_stats": _unmapped(energy_stats, mapped_energy_stats_keys),
-            "unmapped_custom_energy_stats": _unmapped(custom_energy_stats, mapped_energy_stats_keys),
-        }
