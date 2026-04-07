@@ -18,6 +18,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
+try:
+    from homeassistant.helpers.entity import EntityCategory
+except ImportError:  # pragma: no cover - fallback for lightweight test stubs
+    from enum import Enum
+
+    class EntityCategory(Enum):
+        """Fallback EntityCategory enum for test environments."""
+
+        DIAGNOSTIC = "diagnostic"
+
 from .const import DOMAIN
 
 if TYPE_CHECKING:
@@ -424,7 +434,7 @@ class SigenEnergyRawDiagnosticSensor(
 
     _attr_has_entity_name = True
     _attr_translation_key = "raw_payload_diagnostic"
-    _attr_entity_category = "diagnostic"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self,
