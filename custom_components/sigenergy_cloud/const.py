@@ -45,6 +45,7 @@ ENDPOINT_REALTIME_CONSUMPTION = (
     "data-process/sigen/station/statistics/real-time-consumption"
 )
 ENDPOINT_ENERGY_STATS = "data-process/sigen/station/statistics/v1/energy"
+ENDPOINT_ENERGY_STATS_CUSTOM = "data-process/sigen/station/statistics/v1/energy/custom"
 
 # Operational modes
 OPERATIONAL_MODES: dict[int, str] = {

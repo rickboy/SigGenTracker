@@ -17,12 +17,12 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   - Current/available modes
   - System devices and smart load details
   - Current local weather
+  - Daily energy statistics
   - Custom energy statistics
-  - Tariff SoC day statistics
 - Added API client methods for:
   - Current local weather (`device/sigen/device/getCurrentLocalWeather`)
+  - Daily energy statistics (`data-process/sigen/station/statistics/v1/energy`)
   - Custom energy statistics (`data-process/sigen/station/statistics/v1/energy/custom`)
-  - Tariff SoC day (`data-process/sigen/station/statistics/tariff-soc/day`)
 
 ### Changed
 - Updated power sensor units from W to kW.

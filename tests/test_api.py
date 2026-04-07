@@ -362,6 +362,68 @@ class TestApiMethods:
         assert call_kwargs["params"] == {"stationSnCode": "102026031800194"}
 
     @pytest.mark.asyncio
+    async def test_get_custom_energy_stats(self, mock_session):
+        client = await self._make_authed_client(mock_session)
+
+        custom_stats = {"dailyImportEnergy": 9.3, "dailyExportEnergy": 4.1}
+        api_resp = make_mock_response(
+            200,
+            json_data={"code": 0, "data": custom_stats, "message": "success"},
+        )
+        mock_session.request.return_value = api_resp
+
+        result = await client.get_custom_energy_stats(
+            "STATION001",
+            "20260407",
+            "20260407",
+            date_flag=1,
+        )
+        assert result == custom_stats
+
+        call_kwargs = mock_session.request.call_args[1]
+        assert call_kwargs["params"] == {
+            "stationId": "STATION001",
+            "startDate": "20260407",
+            "endDate": "20260407",
+            "dateFlag": 1,
+            "resourceIds": "energy_card",
+        }
+
+    @pytest.mark.asyncio
+    async def test_get_custom_energy_stats_fallback_params(self, mock_session):
+        client = await self._make_authed_client(mock_session)
+
+        fail_resp = make_mock_response(
+            500,
+            text='{"code":1,"msg":"system error","data":{}}',
+        )
+        success_resp = make_mock_response(
+            200,
+            json_data={
+                "code": 0,
+                "data": {"dailyImportEnergy": 3.2},
+                "message": "success",
+            },
+        )
+        mock_session.request.side_effect = [fail_resp, success_resp]
+
+        result = await client.get_custom_energy_stats(
+            "STATION001",
+            "20260407",
+            "20260407",
+            date_flag=1,
+        )
+        assert result["dailyImportEnergy"] == 3.2
+
+        assert mock_session.request.call_count == 2
+        first_call = mock_session.request.call_args_list[0]
+        second_call = mock_session.request.call_args_list[1]
+        assert first_call[0][0] == "GET"
+        assert first_call[1]["params"]["stationId"] == "STATION001"
+        assert first_call[1]["params"]["resourceIds"] == "energy_card"
+        assert second_call[0][0] == "GET"
+
+    @pytest.mark.asyncio
     async def test_set_operational_mode(self, mock_session):
         client = await self._make_authed_client(mock_session)
 

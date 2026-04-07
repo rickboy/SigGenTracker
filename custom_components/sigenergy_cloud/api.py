@@ -26,6 +26,7 @@ from .const import (
     ENDPOINT_CURRENT_LOCAL_WEATHER,
     ENDPOINT_ENERGY_FLOW,
     ENDPOINT_ENERGY_STATS,
+    ENDPOINT_ENERGY_STATS_CUSTOM,
     ENDPOINT_MODE_CURRENT,
     ENDPOINT_MODE_SET,
     ENDPOINT_MODES_ALL,
@@ -357,6 +358,104 @@ class SigenCloudApiClient:
                 "dateFlag": date_flag,
             },
         )
+
+    async def get_custom_energy_stats(
+        self,
+        station_id: str,
+        start_date: str,
+        end_date: str,
+        *,
+        date_flag: int = 1,
+        resource_ids: str = "energy_card",
+    ) -> dict[str, Any]:
+        """Get custom energy statistics for a station and date range.
+
+        Some regions/accounts reject one station identifier key but accept another.
+        Try a small compatibility set before surfacing the final API error.
+        """
+        start_variants = [start_date]
+        end_variants = [end_date]
+        if len(start_date) == 8 and start_date.isdigit():
+            start_variants.append(f"{start_date[:4]}-{start_date[4:6]}-{start_date[6:8]}")
+        if len(end_date) == 8 and end_date.isdigit():
+            end_variants.append(f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]}")
+
+        params_candidates: list[dict[str, Any]] = []
+        for sdate in start_variants:
+            for edate in end_variants:
+                params_candidates.extend(
+                    [
+                        {
+                            "stationId": station_id,
+                            "startDate": sdate,
+                            "endDate": edate,
+                            "dateFlag": date_flag,
+                            "resourceIds": resource_ids,
+                        },
+                        {
+                            "id": station_id,
+                            "startDate": sdate,
+                            "endDate": edate,
+                            "dateFlag": date_flag,
+                            "resourceIds": resource_ids,
+                        },
+                        {
+                            "stationId": station_id,
+                            "startDate": sdate,
+                            "endDate": edate,
+                            "resourceIds": resource_ids,
+                        },
+                    ]
+                )
+
+                if self._station_sn_code:
+                    params_candidates.append(
+                        {
+                            "stationSnCode": self._station_sn_code,
+                            "startDate": sdate,
+                            "endDate": edate,
+                            "dateFlag": date_flag,
+                            "resourceIds": resource_ids,
+                        }
+                    )
+
+        seen: set[tuple[tuple[str, Any], ...]] = set()
+        deduped_candidates: list[dict[str, Any]] = []
+        for params in params_candidates:
+            key = tuple(sorted(params.items(), key=lambda item: item[0]))
+            if key not in seen:
+                seen.add(key)
+                deduped_candidates.append(params)
+
+        last_error: SigenCloudApiError | None = None
+        for params in deduped_candidates:
+            try:
+                return await self._request(
+                    "GET",
+                    ENDPOINT_ENERGY_STATS_CUSTOM,
+                    params=params,
+                )
+            except SigenCloudApiError as err:
+                last_error = err
+                _LOGGER.debug(
+                    "Custom energy stats failed method=GET params=%s: %s",
+                    params,
+                    err,
+                )
+
+        if last_error is not None:
+            last_message = str(last_error)
+            if "HTTP 500" in last_message and (
+                "system error" in last_message.lower() or '"code":1' in last_message
+            ):
+                raise SigenCloudApiError(
+                    "Custom energy stats endpoint appears unsupported for this account/region"
+                ) from last_error
+            raise SigenCloudApiError(
+                f"Custom energy stats request failed after compatibility retries: {last_message}"
+            ) from last_error
+
+        raise SigenCloudApiError("Custom energy stats request failed")
 
     async def get_all_data(self, station_id: str) -> dict[str, Any]:
         """Fetch core and optional datasets for the coordinator."""

@@ -291,6 +291,35 @@ async def run() -> None:
                 _dump_payload("Energy stats response", energy_stats)
             except SigenCloudApiError as exc:
                 print(f"FAILED\n    {exc}")
+
+            # --- Step 10: Custom energy stats ---
+            print(
+                f"\n[10] Fetching custom energy stats for stationId={station_id} date={stats_date} ...",
+                end=" ",
+                flush=True,
+            )
+            try:
+                custom_energy_stats = await client.get_custom_energy_stats(
+                    station_id,
+                    stats_date,
+                    stats_date,
+                    date_flag=1,
+                    resource_ids="energy_card"
+                )
+                print("OK")
+                _dump_payload("Custom energy stats response", custom_energy_stats)
+            except SigenCloudApiError as exc:
+                message = str(exc)
+                lowered = message.lower()
+                if (
+                    "unsupported for this account/region" in lowered
+                    or ("http 500" in lowered and ("system error" in lowered or '"code":1' in lowered))
+                ):
+                    print("UNAVAILABLE")
+                    print("    Endpoint appears unsupported for this account/region")
+                else:
+                    print(f"FAILED\n    {exc}")
+
         else:
             print("\n[3] Skipped energy flow (no stationId found)")
             print("[4] Skipped current mode (no stationId found)")
@@ -299,6 +328,7 @@ async def run() -> None:
             print("[7] Skipped smart load details (no stationId found)")
             print("[8] Skipped current local weather (no stationId found)")
             print("[9] Skipped energy stats (no stationId found)")
+            print("[10] Skipped custom energy stats (no stationId found)")
 
         # --- Step 11: Token refresh ---
         print("\n[11] Testing token refresh ...", end=" ", flush=True)

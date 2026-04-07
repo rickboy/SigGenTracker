@@ -81,8 +81,8 @@ The harness calls and prints full payloads for:
 - Current/available modes
 - System devices and smart load details
 - Current local weather (`device/sigen/device/getCurrentLocalWeather`)
+- Daily energy statistics (`data-process/sigen/station/statistics/v1/energy`)
 - Custom energy statistics (`data-process/sigen/station/statistics/v1/energy/custom`)
-- Tariff SoC day statistics (`data-process/sigen/station/statistics/tariff-soc/day`)
 
 ## Requirements
 
